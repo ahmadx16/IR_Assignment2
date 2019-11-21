@@ -159,6 +159,8 @@ qkeys = querydict.keys()
 #######  Score Function 1 (BM25)
 if scoreName=="BM25":
     scorefilebm = open('scorefilebm.txt','w')
+    TablePrecision = open("TablePrecision.txt",'w')
+    TablePrecision.write("Query Id"+'\t\t\t'+"P@5"+'\t\t\t'+"P@10"+'\t\t\t'+"P@20"+'\t\t\t'+"P@30"+'\t\t\t'+"MAP" + "\n")
     qkeys = querydict.keys()
     for qkey in qkeys:
         q1 = querydict[qkey]
@@ -190,11 +192,65 @@ if scoreName=="BM25":
         
         temparr.sort(reverse=True,key=lambda x: x[1])
 
+         ##  Evaluation
+
+        # p@5
+        relcount =0
+        precision5=0
+        for i in range(len(temparr)):
+            if dicdids[str(temparr[i][0])] in releventDocarr[int(qkey)]:
+                relcount+=1
+            precision5 = relcount*1.0/(i+1)
+            if i+1 ==5:
+                break
+        
+        # p@10
+        relcount =0
+        precision10=0
+        for i in range(len(temparr)):
+            if dicdids[str(temparr[i][0])] in releventDocarr[int(qkey)]:
+                relcount+=1
+            precision10 = relcount*1.0/(i+1)
+            if i+1 ==10:
+                break
+
+        # p@20
+        relcount =0
+        precision20=0
+        for i in range(len(temparr)):
+            if dicdids[str(temparr[i][0])] in releventDocarr[int(qkey)]:
+                relcount+=1
+            precision20 = relcount*1.0/(i+1)
+            if i+1 ==20:
+                break
+        
+        # p@30
+        relcount =0
+        precision30=0
+        for i in range(len(temparr)):
+            if dicdids[str(temparr[i][0])] in releventDocarr[int(qkey)]:
+                relcount+=1
+            precision30 = relcount*1.0/(i+1)
+            if i+1 ==30:
+                break
+         # MAP
+        relcount =0
+        precisionMAP=0
+        for i in range(len(temparr)):
+            if dicdids[str(temparr[i][0])] in releventDocarr[int(qkey)]:
+                relcount+=1
+            precisionMAP += relcount*1.0/(i+1)
+        precisionMAP/=(len(allDocs)-1)
+        # writing precision table
+        TablePrecision.write(str(qkey)+'\t\t\t'+str(precision5)+'\t\t\t'+str(precision10)+'\t\t\t'+str(precision20)+'\t\t\t'+str(precision30)+'\t\t\t'+str(precisionMAP) + "\n")
+    
+
         
         for i in range(0,len(allDocs)-1):
             scorefilebm.write(str(qkey) +' '+dicdids[str(temparr[i][0])] +' '+ str(i+1) +' '+str(temparr[i][1])+' '+ 'run3'+'\n' )
 
     scorefilebm.close()
+    TablePrecision.close()
 
 #######  Score Function 2 (Dirichlet)
 
