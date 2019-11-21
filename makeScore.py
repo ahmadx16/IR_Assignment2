@@ -48,6 +48,35 @@ topIds = [topics[i].get('number') for i in range(len(topics)) ]
 querydict = {topIds[i] :fnewstoplis[i] for i in range(len(topIds))}
 
 
+#  Real relevent 
+realRelfile = open('relevance judgements.qrel','r')
+
+realRel = realRelfile.readlines()
+
+qid = 0
+releventDocarr={}
+
+for line in realRel:
+    linearr = line.split()
+    
+    
+    if int(linearr[0])!=qid:
+        qid = int(linearr[0])
+        
+        if linearr[3]!="0" and linearr[3]!="-2":
+            releventDocarr[qid] =[linearr[2]]
+        else:
+            releventDocarr[qid] =[]
+
+    else:
+        if linearr[3]!="0" and linearr[3]!="-2":
+            releventDocarr[qid].append(linearr[2])
+
+listdocRel = list(releventDocarr.values())
+
+
+
+
 
 # file reading 
 tIndexFile = open('term_index.txt','r')
@@ -102,6 +131,8 @@ AvgDocLen = TotalCorpusWords/(len(allDocs)-1)
 
 
 
+
+
 tidFile = open('termid.txt','r')
 tids = tidFile.readlines()
 termId ={}
@@ -117,6 +148,10 @@ for did in dids:
     ddid = did.split()
     dicdids[ddid[0]] = ddid[1]
 didFile.close()
+
+inv_dicdids = {v: k for k, v in dicdids.items()}
+
+
 
 #print(dicdids[str(1)])
 
@@ -166,6 +201,7 @@ if scoreName=="BM25":
 ## N/N+u  (doc)  + u/(N+u) (corpus)
 if scoreName=="Dirichlet":
     scorefiledir = open("scorefiledir.txt",'w') 
+    TablePrecision = open("TablePrecision.txt",'w')
     for qkey in qkeys:
         q1 = querydict[qkey]
 
@@ -203,13 +239,24 @@ if scoreName=="Dirichlet":
 
         ##  Evaluation
 
-
+        # p@5
+        relcount =0
+        precision5=0
+        for i in range(len(temparr)):
+            if dicdids[str(temparr[i][0])] in releventDocarr[int(qkey)]:
+                relcount+=1
+            precision5 = relcount*1.0/(i+1)
+            if i+1 ==5:
+                break
+        
+        TablePrecision.write(str(qkey)+' '+str(precision5) + "\n")
     
         for i in range(0,len(allDocs)-1):
             scorefiledir.write(str(qkey) +' '+dicdids[str(temparr[i][0])] +' '+ str(i+1)+' ' +str(temparr[i][1])+' '+ 'run3'+'\n' )
 
 
     scorefiledir.close()
+    TablePrecision.close()
 
 
 
